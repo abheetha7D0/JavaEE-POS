@@ -13,84 +13,57 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+
 public class CustomerDAOImpl implements CustomerDAO {
+
     @Override
     public boolean add(Customer customer, DataSource dataSource) throws SQLException, ClassNotFoundException {
         Connection connection = dataSource.getConnection();
         PreparedStatement stm = connection.prepareStatement("INSERT INTO Customer VALUES (?,?,?,?)");
+        stm.setString(1, customer.getCustId());
+        stm.setString(2, customer.getCustName());
+        stm.setInt(3, Integer.parseInt(customer.getAddress()));
+        stm.setDouble(4, Double.parseDouble(customer.getSalary()));
 
-        stm.setString(1,customer.getCustId());
-        stm.setString(2,customer.getCustName());
-        stm.setString(3,customer.getAddress());
-        stm.setString(4,customer.getSalary());
-
-        if(stm.executeUpdate()>0){
+        if (stm.executeUpdate() > 0) {
             connection.close();
             return true;
-        }else {
-            return false;
-        }
-
-
-
-    }
-
-    @Override
-    public boolean delete(String id,DataSource dataSource) throws SQLException, ClassNotFoundException {
-        Connection connection = dataSource.getConnection();
-        if (connection.prepareStatement("DELETE FROM Customer WHERE CustID='"+id+"'").executeUpdate()>0){
-            connection.close();
-            return true;
-        }else{
+        } else {
             return false;
         }
     }
 
     @Override
-    public boolean update(Customer c,DataSource dataSource) throws SQLException, ClassNotFoundException {
+    public boolean delete(String s, DataSource dataSource) throws SQLException, ClassNotFoundException {
         Connection connection = dataSource.getConnection();
-        PreparedStatement stm = connection.prepareStatement("UPDATE Customer SET CustName=?, CustAddress=?, Salary=? WHERE CustID=?");
-        stm.setObject(1,c.getCustName());
-        stm.setObject(2,c.getAddress());
-        stm.setObject(3,c.getSalary());
-        stm.setObject(4,c.getCustId());
-
-        if(stm.executeUpdate()>0){
+        if (connection.prepareStatement("DELETE FROM Customer WHERE ItemCode='" + s + "'").executeUpdate() > 0) {
             connection.close();
             return true;
-        }else {
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean update(Customer customer, DataSource dataSource) throws SQLException, ClassNotFoundException {
+        Connection connection = dataSource.getConnection();
+        PreparedStatement stm = connection.prepareStatement("UPDATE Customer SET CustName=?, Address=?, Salary=? WHERE CustId=?");
+        stm.setObject(1, customer.getCustId());
+        stm.setObject(2, customer.getCustName());
+        stm.setObject(3, customer.getAddress());
+        stm.setObject(4, customer.getSalary());
+
+        if (stm.executeUpdate() > 0) {
+            connection.close();
+            return true;
+        } else {
             return false;
         }
     }
 
     @Override
     public JsonObjectBuilder search(String s, DataSource dataSource) throws SQLException, ClassNotFoundException {
-
-
-        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-
-        Connection connection = dataSource.getConnection();
-        PreparedStatement stm = connection.prepareStatement("SELECT * From Customer WHERE CustID=?");
-        stm.setString(1, s);
-        ResultSet rst = stm.executeQuery();
-        Customer customer;
-        while (rst.next()) {
-
-            String id = rst.getString(1);
-            String name = rst.getString(2);
-            String address = rst.getString(3);
-            String salary = rst.getString(4);
-
-            objectBuilder.add("id",id);
-            objectBuilder.add("name",name);
-            objectBuilder.add("address",address);
-            objectBuilder.add("salary",salary);
-
-
-
-        }
-        connection.close();
-        return objectBuilder;
+        return null;
     }
 
     @Override
@@ -100,19 +73,19 @@ public class CustomerDAOImpl implements CustomerDAO {
 
         try {
             Connection connection = dataSource.getConnection();
-            PreparedStatement stm = connection.prepareStatement("select * from customer");
+            PreparedStatement stm = connection.prepareStatement("select * from Customer");
             ResultSet resultSet = stm.executeQuery();
 
-            while (resultSet.next()){
-                String id = resultSet.getString(1);
-                String name = resultSet.getString(2);
-                String address = resultSet.getString(3);
-                String salary = resultSet.getString(4);
+            while (resultSet.next()) {
+                String CustId = resultSet.getString(1);
+                String CustName = resultSet.getString(2);
+                String Address = resultSet.getString(3);
+                String Salary = resultSet.getString(4);
 
-                objectBuilder.add("id",id);
-                objectBuilder.add("name",name);
-                objectBuilder.add("address",address);
-                objectBuilder.add("salary",salary);
+                objectBuilder.add("custId", CustId);
+                objectBuilder.add("custName", CustName);
+                objectBuilder.add("address", Address);
+                objectBuilder.add("salary", Salary);
 
                 JsonObject build = objectBuilder.build();
                 arrayBuilder.add(build);
@@ -122,14 +95,9 @@ public class CustomerDAOImpl implements CustomerDAO {
 
             return arrayBuilder;
 
-
-
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-
         return null;
     }
 }

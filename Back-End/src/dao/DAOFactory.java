@@ -1,9 +1,6 @@
 package dao;
 
 import dao.custom.impl.CustomerDAOImpl;
-import dao.custom.impl.ItemDAOImpl;
-import dao.custom.impl.OrderDAOImpl;
-import dao.custom.impl.OrderDetailsDAOImpl;
 
 public class DAOFactory {
     private static DAOFactory daoFactory;
@@ -21,12 +18,13 @@ public class DAOFactory {
         switch (types) {
             case CUSTOMER:
                 return new CustomerDAOImpl();
-            case ITEM:
+
+            /*case ITEM:
                 return new ItemDAOImpl();
             case ORDER:
                 return new OrderDAOImpl();
             case ORDERDETAILS:
-                return new OrderDetailsDAOImpl();
+                return new OrderDetailsDAOImpl();*/
 
             default:
                 return null;

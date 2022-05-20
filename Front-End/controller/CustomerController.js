@@ -15,12 +15,20 @@ function loadAllCustomers() {
 }
 
 function saveCustomer() {
+
     var id = $("#txtCusID").val();
     var name = $("#txtCusName").val();
     var address = $("#txtCusAddress").val();
     var salary = $("#txtCusSalary").val();
 
-    customerDB.push(new CustomerDTO(id, name, address, salary));
+    var data=$("#Customer-Form").serialize();
+
+    $.ajax({
+        url:"http://localhost:8080/POS/customer",method:"post",data:data,successes(resp){
+            alert(resp.data)
+        }
+    })
+    // customerDB.push(new CustomerDTO(id, name, address, salary));
 
 }
 
@@ -79,8 +87,8 @@ function searchCustomerFromID(typedCustomerID) {
 $("#btnCusSave").click(function () {
 
     saveCustomer();
-    $("#inputCusId,#inputCustomerName,#inputCusAddress,#inputCusSalary").val("");
-    loadAllCustomers();
+    // $("#inputCusId,#inputCustomerName,#inputCusAddress,#inputCusSalary").val("");
+    // loadAllCustomers();
 
 });
 
