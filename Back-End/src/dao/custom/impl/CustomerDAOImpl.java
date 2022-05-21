@@ -22,7 +22,7 @@ public class CustomerDAOImpl implements CustomerDAO {
         PreparedStatement stm = connection.prepareStatement("INSERT INTO Customer VALUES (?,?,?,?)");
         stm.setString(1, customer.getCustId());
         stm.setString(2, customer.getCustName());
-        stm.setInt(3, Integer.parseInt(customer.getAddress()));
+        stm.setString(3, customer.getAddress());
         stm.setDouble(4, Double.parseDouble(customer.getSalary()));
 
         if (stm.executeUpdate() > 0) {

@@ -3,11 +3,19 @@
     <Resource
             name="jdbc/pool"
             type="javax.sql.DataSource"
-            driverClassName="com.mysql.jdbc.Driver"
+            driverClassName="com.mysql.cj.jdbc.Driver"
             url="jdbc:mysql://localhost:3306/webpos"
             username="root"
             password="1234"
             maxTotal="5"
             initialSize="5"
     ></Resource>
+    <filter>
+        <filter-name>CorsFilter</filter-name>
+        <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+        <init-param>
+            <param-name>cors.allowed.origins</param-name>
+            <param-value> http://localhost:4200, http://localhost:3000 </param-value>
+        </init-param>
+    </filter>
 </Context>

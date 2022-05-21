@@ -22,7 +22,7 @@ public class CustomerBOImpl implements CustomerBO {
 
     @Override
     public JsonArrayBuilder loadAllCustomerForTable(DataSource d) throws SQLException, ClassNotFoundException {
-        return null;
+        return customerDAO.getAll(d);
     }
 
     @Override

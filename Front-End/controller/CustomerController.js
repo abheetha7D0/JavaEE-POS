@@ -1,33 +1,38 @@
 function loadAllCustomers() {
-    $("#customerTable").empty();
-    for (var i of customerDB) {
-        let row = `<tr><td>${i.getCustomerID()}</td><td>${i.getCustomerName()}</td><td>${i.getCustomerAddress()}</td><td>${i.getCustomerSalary()}</td></tr>`;
-        $("#customerTable").append(row);
-        $("#customerTable>tr").click(function () {
-            $('#inputSearchCus').val($(this).children(":eq(0)").text())
 
-            $('#inputUId').val($(this).children(":eq(0)").text())
-            $('#inputUCustomerName').val($(this).children(":eq(1)").text())
-            $('#inputUAddress').val($(this).children(":eq(2)").text())
-            $('#inputUSalary').val($(this).children(":eq(3)").text())
-        })
-    }
+    $("#customerTable ").empty();
+
+    $.ajax({
+        url: "http://localhost:8080/POS/customer", method: "get", success(resp) {
+
+            for (const respElement of resp.data) {
+                $("#customerTable").append("<tr>" + "<td>" + respElement.custId + "</td>" + "<td>" + respElement.custName + "</td>" + "<td>" + respElement.address + "</td>" + "<td>" + respElement.salary + "</td>" + "</tr>");
+            }
+        }
+    })
 }
 
 function saveCustomer() {
 
-    var id = $("#txtCusID").val();
-    var name = $("#txtCusName").val();
-    var address = $("#txtCusAddress").val();
-    var salary = $("#txtCusSalary").val();
-
-    var data=$("#Customer-Form").serialize();
+    var data = $("#Customer-Form").serialize();
 
     $.ajax({
-        url:"http://localhost:8080/POS/customer",method:"post",data:data,successes(resp){
-            alert(resp.data)
+        url: "http://localhost:8080/POS/customer",
+        method: "post",
+        data: data,
+        success(res) {
+            alert("success");
+            $("#txtCusID").val("");
+            $("#txtCusName").val("");
+            $("#txtCusAddress").val("");
+            $("#txtCusSalary").val("");
+            loadAllCustomers();
+        },
+        error(res) {
+            alert("Fail");
         }
     })
+
     // customerDB.push(new CustomerDTO(id, name, address, salary));
 
 }
@@ -65,13 +70,17 @@ function updateCustomer() {
 
 function searchCustomer() {
 
-    $("#customerTable").empty()
-    let cus;
-    for (var i = 0; i < customerDB.length; i++) {
-        if ($('#inputSearchCus').val() == customerDB[i].getCustomerID()) {
-            cus = customerDB[i];
-            let row = `<tr><td>${cus.getCustomerID()}</td><td>${cus.getCustomerName()}</td><td>${cus.getCustomerAddress()}</td><td>${cus.getCustomerSalary()}</td></tr>`;
-            $("#customerTable").append(row);
+    if($('#inputSearchCus').val() == ''){
+        loadAllCustomers();
+    }else {
+        $("#customerTable").empty()
+        let cus;
+        for (var i = 0; i < customerDB.length; i++) {
+            if ($('#inputSearchCus').val() == customerDB[i].getCustomerID()) {
+                cus = customerDB[i];
+                let row = `<tr><td>${cus.getCustomerID()}</td><td>${cus.getCustomerName()}</td><td>${cus.getCustomerAddress()}</td><td>${cus.getCustomerSalary()}</td></tr>`;
+                $("#customerTable").append(row);
+            }
         }
     }
 }
@@ -87,8 +96,7 @@ function searchCustomerFromID(typedCustomerID) {
 $("#btnCusSave").click(function () {
 
     saveCustomer();
-    // $("#inputCusId,#inputCustomerName,#inputCusAddress,#inputCusSalary").val("");
-    // loadAllCustomers();
+    loadAllCustomers();
 
 });
 
@@ -118,14 +126,14 @@ $("#btnCusUpdate").click(function () {
 $("#btnCusSearch").click(function () {
     searchCustomer();
 });
+
 $("#btnGetAllCus").click(function () {
     loadAllCustomers();
     $('#inputSearchCus').val("");
 });
 
-//validation started
-// customer regular expressions
-const cusIDRegEx = /^(C00-)[0-9]{1,3}$/;
+
+const cusIDRegEx = /^(C0-)[0-9]{1,3}$/;
 const cusNameRegEx = /^[A-z ]{5,20}$/;
 const cusAddressRegEx = /^[0-9/A-z. ,]{7,}$/;
 const cusSalaryRegEx = /^[0-9]{1,}[.]?[0-9]{1,2}$/;
@@ -141,7 +149,7 @@ $('#txtCusID,#txtCusName,#txtCusAddress,#txtCusSalary').on('blur', function () {
     formValid();
 });
 
-//focusing events
+
 $("#txtCusID").on('keyup', function (eventOb) {
     setButton();
     if (eventOb.key == "Enter") {
@@ -180,7 +188,8 @@ $("#txtCusSalary").on('keyup', function (eventOb) {
         checkIfValid();
     }
 });
-// focusing events end
+
+
 $("#btnCustomer").attr('disabled', true);
 
 function clearAll() {
@@ -276,5 +285,6 @@ function setButton() {
 
 $('#btnCustomer').click(function () {
     checkIfValid();
+    loadAllCustomers();
 });
 

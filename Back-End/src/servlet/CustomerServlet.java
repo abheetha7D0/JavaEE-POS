@@ -6,6 +6,7 @@ import dto.CustomerDTO;
 
 import javax.annotation.Resource;
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -16,9 +17,9 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
-@WebServlet (urlPatterns = "/*")
-
+@WebServlet (urlPatterns = "/customer")
 public class CustomerServlet extends HttpServlet {
 
     private final CustomerBO customerBO = (CustomerBO) BOFactory.getBOFactory().getBO(BOFactory.BoTypes.Customer);
@@ -28,7 +29,21 @@ public class CustomerServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType("application/json");
 
+        try {
+
+            JsonArrayBuilder jsonArrayBuilder = customerBO.loadAllCustomerForTable(dataSource);
+            PrintWriter writer = resp.getWriter();
+            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+            objectBuilder.add("status", 200);
+            objectBuilder.add("message", "done");
+            objectBuilder.add("data", jsonArrayBuilder.build());
+            writer.print(objectBuilder.build());
+
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -50,29 +65,19 @@ public class CustomerServlet extends HttpServlet {
         try {
             if (customerBO.addNewCustomer(customerDTO,dataSource)){
                 JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-                resp.setStatus(HttpServletResponse.SC_CREATED);
-
+                resp.setStatus(HttpServletResponse.SC_OK);
                 objectBuilder.add("status", 200);
                 objectBuilder.add("message", "done");
-                objectBuilder.add("data", "Successfully Added !");
+                objectBuilder.add("data", "Sucessfully Added !");
                 writer.print(objectBuilder.build());
             }
-        } catch (SQLException throwables) {
+        } catch (SQLException | ClassNotFoundException throwables) {
             JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
             resp.setStatus(HttpServletResponse.SC_CREATED);
-
+            System.out.println(throwables);
             objectBuilder.add("status", 400);
-            objectBuilder.add("message", "done");
+            objectBuilder.add("message", "Fail");
             objectBuilder.add("data", throwables.getLocalizedMessage());
-            writer.print(objectBuilder.build());
-        } catch (ClassNotFoundException e) {
-
-            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-            resp.setStatus(HttpServletResponse.SC_CREATED);
-
-            objectBuilder.add("status", 400);
-            objectBuilder.add("message", "done");
-            objectBuilder.add("data", e.getLocalizedMessage());
             writer.print(objectBuilder.build());
         }
 
