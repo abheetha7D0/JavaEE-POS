@@ -33,7 +33,7 @@ function saveCustomer() {
         }
     })
 
-    // customerDB.push(new CustomerDTO(id, name, address, salary));
+
 
 }
 
@@ -54,18 +54,29 @@ function deleteCustomer(id) {
 }
 
 function updateCustomer() {
-    let customerID = $('#inputUId').val();
-    let customerName = $("#inputUCustomerName").val();
-    let customerAddress = $("#inputUAddress").val();
-    let customerSalary = $("#inputUSalary").val();
-    for (var i = 0; i < customerDB.length; i++) {
-        if (customerDB[i].getCustomerID() == $("#inputUId").val()) {
-            var customer = customerDB[i];
-            customer.setCustomerName(customerName);
-            customer.setCustomerAddress(customerAddress);
-            customer.setCustomeSalary(customerSalary)
-        }
+    var data = $("#Customer-update-Form").serialize();
+    var cusObject ={
+        "id":$("#inputUId").val(),
+        "name":$("#inputUCustomerName").val(),
+        "address":$("#inputUAddress").val(),
+        "salary":$("#inputUSalary").val()
     }
+    $.ajax({
+
+        url:"http://localhost:8080/POS/customer",
+        method:"PUT",
+        contentType:"application/json",
+        data:JSON.stringify(cusObject),
+        success(resp){
+            if(resp.status==200){
+                loadAllCustomers();
+                alert(resp.message);
+            }else {
+                alert(resp.data);
+
+            }
+        }
+    });
 }
 
 function searchCustomer() {

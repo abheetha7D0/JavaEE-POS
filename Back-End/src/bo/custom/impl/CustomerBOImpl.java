@@ -13,11 +13,11 @@ import java.sql.SQLException;
 
 
 public class CustomerBOImpl implements CustomerBO {
-    private final CustomerDAO customerDAO= (CustomerDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.CUSTOMER);
+    private final CustomerDAO customerDAO = (CustomerDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.CUSTOMER);
 
     @Override
     public boolean addNewCustomer(CustomerDTO dto, DataSource d) throws SQLException, ClassNotFoundException {
-        return customerDAO.add(new Customer(dto.getCustId(), dto.getCustName(), dto.getAddress(), dto.getSalary()),d);
+        return customerDAO.add(new Customer(dto.getCustId(), dto.getCustName(), dto.getAddress(), dto.getSalary()), d);
     }
 
     @Override
@@ -27,16 +27,16 @@ public class CustomerBOImpl implements CustomerBO {
 
     @Override
     public boolean deleteCustomer(String id, DataSource dataSource) throws SQLException, ClassNotFoundException {
-        return false;
+        return customerDAO.delete(id, dataSource);
     }
 
     @Override
     public boolean updateCustomer(CustomerDTO c, DataSource dataSource) throws SQLException, ClassNotFoundException {
-        return false;
+        return customerDAO.update(new Customer(c.getCustId(), c.getCustName(), c.getAddress(), c.getSalary()), dataSource);
     }
 
     @Override
     public JsonObjectBuilder getCustomer(String id, DataSource dataSource) throws SQLException, ClassNotFoundException {
-        return null;
+        return customerDAO.search(id,dataSource);
     }
 }

@@ -5,9 +5,7 @@ import bo.custom.CustomerBO;
 import dto.CustomerDTO;
 
 import javax.annotation.Resource;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
+import javax.json.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -81,5 +79,38 @@ public class CustomerServlet extends HttpServlet {
             writer.print(objectBuilder.build());
         }
 
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        JsonReader reader = Json.createReader(req.getReader());
+        JsonObject jsonObject = reader.readObject();
+
+        resp.setContentType("application/jason");
+        PrintWriter writer = resp.getWriter();
+
+        String custId = jsonObject.getString("custId");
+        String custName = jsonObject.getString("custName");
+        String address = jsonObject.getString("Address");
+        String salary = jsonObject.getString("Salary");
+
+        CustomerDTO customerDTO = new CustomerDTO(
+                custId,custName,address,salary
+        );
+        try {
+            if(customerBO.updateCustomer(customerDTO,dataSource)){
+                JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+                objectBuilder.add("data","");
+                objectBuilder.add("message","Update Done");
+                objectBuilder.add("status",200);
+                writer.print(objectBuilder.build());
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+            objectBuilder.add("data",e.getLocalizedMessage());
+            objectBuilder.add("message","Error");
+            objectBuilder.add("status",500);
+            writer.print(objectBuilder.build());
+        }
     }
 }
