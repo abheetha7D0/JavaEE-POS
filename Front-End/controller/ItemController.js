@@ -1,25 +1,56 @@
 function loadAllItems() {
-    $("#itemTable").empty();
-    for (var i of itemDB) {
-        let row = `<tr><td>${i.getItemCode()}</td><td>${i.getItemName()}</td><td>${i.getItemQTY()}</td><td>${i.getUnitPrice()}</td></tr>`;
-        $("#itemTable").append(row);
-        $("#itemTable>tr").click(function () {
-            $('#btnSearchItem').val($(this).children(":eq(0)").text())
 
-            $('#inputUCode').val($(this).children(":eq(0)").text())
-            $('#inputUName').val($(this).children(":eq(1)").text())
-            $('#inputUPrice').val($(this).children(":eq(2)").text())
-            $('#inputUQuantity').val($(this).children(":eq(3)").text())
-        })
-    }
+    $("#itemTable").empty();
+    $.ajax({
+        url:"http://localhost:8080/POS/item",
+        method:"GET",
+        success(resp) {
+            console.log(resp.data);
+            for (var i of resp.data) {
+                var row = `<tr><td>${i.ItemCode}</td><td>${i.name}</td><td>${i.QtyOnHand}</td><td>${i.unitPrice}</td></tr>`;
+
+                $("#itemTable").append(row);
+
+
+                $("#itemTable>tr").click(function () {
+
+
+                    $("#txtItemCode").val($(this).children(":eq(0)").text());
+                    $("#txtItemName").val($(this).children(":eq(1)").text());
+                    $("#txtQty").val($(this).children(":eq(2)").text());
+                    $("#txtPrice").val($(this).children(":eq(3)").text());
+
+
+                });
+            }
+        }
+    });
 }
 
 function saveItem() {
-    var code = $("#inputCode").val();
-    var name = $("#inputItemName").val();
-    var price = $("#inputPrice").val();
-    var quantity = $("#inputQuantity").val();
-    itemDB.push(new ItemDTO(code, name, price, quantity));
+    var data = $("#itemForm").serialize();
+
+
+    $.ajax({
+        url: "http://localhost:8080/POS/item",
+        method: "POST",
+        data: data,
+        success(res) {
+            if (res.status == 200) {
+                alert(res.data);
+                loadAllItems();
+
+
+            } else {
+                alert(res.data);
+            }
+        },
+        error (ob, textStatus, error) {
+            alert(textStatus);
+
+
+        }
+    });
 }
 
 function deleteItem(code) {
@@ -104,9 +135,8 @@ $("#btnGetAllItem").click(function () {
     $('#btnItemSearch').val("");
 });
 
-//validation started
-// customer regular expressions
-const ItemCodeRegEx = /^(I00-)[0-9]{1,3}$/;
+
+const ItemCodeRegEx = /^(I)[0-9]{1,3}$/;
 const itemNameRegEx = /^[A-z ]{2,20}$/;
 const qtyRegEx = /^[0-9]{1,}$/;
 const priceRegEx = /^[0-9]{1,}[.]?[0-9]{1,2}$/;
@@ -114,7 +144,7 @@ const priceRegEx = /^[0-9]{1,}[.]?[0-9]{1,2}$/;
 
 $('#inputCode,#inputItemName,#inputPrice,#inputQuantity').on('keydown', function (eventOb) {
     if (eventOb.key == "Tab") {
-        eventOb.preventDefault(); // stop execution of the button
+        eventOb.preventDefault();
     }
 });
 
@@ -248,4 +278,4 @@ function setButtonItem() {
 $('#btnItemSave').click(function () {
     checkIfValidItem();
 });
-//validation ended
+

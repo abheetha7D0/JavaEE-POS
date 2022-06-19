@@ -17,7 +17,7 @@ import java.sql.SQLException;
 public class CustomerDAOImpl implements CustomerDAO {
 
     @Override
-    public boolean add(Customer customer, DataSource dataSource) throws SQLException, ClassNotFoundException {
+    public boolean add(Customer customer, DataSource dataSource) throws SQLException{
         Connection connection = dataSource.getConnection();
         PreparedStatement stm = connection.prepareStatement("INSERT INTO Customer VALUES (?,?,?,?)");
         stm.setString(1, customer.getCustId());
@@ -34,9 +34,9 @@ public class CustomerDAOImpl implements CustomerDAO {
     }
 
     @Override
-    public boolean delete(String s, DataSource dataSource) throws SQLException, ClassNotFoundException {
+    public boolean delete(String s, DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
-        if (connection.prepareStatement("DELETE FROM Customer WHERE ItemCode='" + s + "'").executeUpdate() > 0) {
+        if (connection.prepareStatement("DELETE FROM Customer WHERE CustId='" + s + "'").executeUpdate() > 0) {
             connection.close();
             return true;
         } else {
@@ -45,7 +45,7 @@ public class CustomerDAOImpl implements CustomerDAO {
     }
 
     @Override
-    public boolean update(Customer customer, DataSource dataSource) throws SQLException, ClassNotFoundException {
+    public boolean update(Customer customer, DataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection();
         PreparedStatement stm = connection.prepareStatement("UPDATE Customer SET CustName=?, Address=?, Salary=? WHERE CustId=?");
 

@@ -15,7 +15,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
-import java.util.logging.Logger;
+
 
 @WebServlet (urlPatterns = "/customer")
 public class CustomerServlet extends HttpServlet {
@@ -72,7 +72,7 @@ public class CustomerServlet extends HttpServlet {
         } catch (SQLException | ClassNotFoundException throwables) {
             JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
             resp.setStatus(HttpServletResponse.SC_CREATED);
-            System.out.println(throwables);
+
             objectBuilder.add("status", 400);
             objectBuilder.add("message", "Fail");
             objectBuilder.add("data", throwables.getLocalizedMessage());
@@ -86,13 +86,15 @@ public class CustomerServlet extends HttpServlet {
         JsonReader reader = Json.createReader(req.getReader());
         JsonObject jsonObject = reader.readObject();
 
+        String custId = jsonObject.getString("cusUpdateId");
+        String custName = jsonObject.getString("cusUpdateName");
+        String address = jsonObject.getString("cusUpdateAddress");
+        String salary = jsonObject.getString("cusUpdateSalary");
+
         resp.setContentType("application/jason");
         PrintWriter writer = resp.getWriter();
 
-        String custId = jsonObject.getString("custId");
-        String custName = jsonObject.getString("custName");
-        String address = jsonObject.getString("Address");
-        String salary = jsonObject.getString("Salary");
+
 
         CustomerDTO customerDTO = new CustomerDTO(
                 custId,custName,address,salary
@@ -111,6 +113,39 @@ public class CustomerServlet extends HttpServlet {
             objectBuilder.add("message","Error");
             objectBuilder.add("status",500);
             writer.print(objectBuilder.build());
+        }
+    }
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String customerID = req.getParameter("customerID");
+        PrintWriter writer = resp.getWriter();
+        resp.setContentType("application/json");
+
+        try {
+            if(customerBO.deleteCustomer(customerID,dataSource)){
+
+                JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+                objectBuilder.add("data","");
+                objectBuilder.add("message","Successfully Deleted");
+                objectBuilder.add("status",200);
+                writer.print(objectBuilder.build());
+            }else{
+
+                JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+                objectBuilder.add("data","");
+                objectBuilder.add("message","Unsuccessfully Deleted");
+                objectBuilder.add("status",400);
+                writer.print(objectBuilder.build());
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+
+            resp.setStatus(200);
+            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+            objectBuilder.add("data",e.getLocalizedMessage());
+            objectBuilder.add("messages","Error");
+            objectBuilder.add("status",500);
+            writer.print(objectBuilder.build());
+
         }
     }
 }

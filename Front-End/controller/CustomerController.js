@@ -21,20 +21,43 @@ function saveCustomer() {
         method: "post",
         data: data,
         success(res) {
-            alert("success");
+            alert(res);
             $("#txtCusID").val("");
             $("#txtCusName").val("");
             $("#txtCusAddress").val("");
             $("#txtCusSalary").val("");
             loadAllCustomers();
         },
-        error(res) {
-            alert("Fail");
+        error: function (ob, txtStatus, error) {
+            alert(txtStatus);
         }
     })
+}
 
+function updateCustomer() {
 
+    var cusObject = {
+        "id": $("#inputUId").val(),
+        "name": $("#inputUCustomerName").val(),
+        "address": $("#inputUAddress").val(),
+        "salary": $("#inputUSalary").val()
+    }
+    $.ajax({
 
+        url: "http://localhost:8080/POS/customer",
+        method: "PUT",
+        contentType: "application/json",
+        data: JSON.stringify(cusObject),
+        success(resp) {
+            if (resp.status == 200) {
+                loadAllCustomers();
+                alert(resp.message);
+            } else {
+                alert(resp.data);
+
+            }
+        }
+    });
 }
 
 function deleteCustomer(id) {
@@ -53,37 +76,11 @@ function deleteCustomer(id) {
     }
 }
 
-function updateCustomer() {
-    var data = $("#Customer-update-Form").serialize();
-    var cusObject ={
-        "id":$("#inputUId").val(),
-        "name":$("#inputUCustomerName").val(),
-        "address":$("#inputUAddress").val(),
-        "salary":$("#inputUSalary").val()
-    }
-    $.ajax({
-
-        url:"http://localhost:8080/POS/customer",
-        method:"PUT",
-        contentType:"application/json",
-        data:JSON.stringify(cusObject),
-        success(resp){
-            if(resp.status==200){
-                loadAllCustomers();
-                alert(resp.message);
-            }else {
-                alert(resp.data);
-
-            }
-        }
-    });
-}
-
 function searchCustomer() {
 
-    if($('#inputSearchCus').val() == ''){
+    if ($('#inputSearchCus').val() == '') {
         loadAllCustomers();
-    }else {
+    } else {
         $("#customerTable").empty()
         let cus;
         for (var i = 0; i < customerDB.length; i++) {
@@ -115,23 +112,31 @@ $("#btnCusDelete").click(function () {
     let id = $('#inputSearchCus').val();
     let option = confirm(`Do you want to delete ID:${id}`);
     if (option) {
-        let erase = deleteCustomer(id);
-        if (erase) {
-            alert("Customer Deleted");
-            $('#inputCusID,#inputCusName,#inputCusAddress,#inputCusSalary').val("");
-        } else {
-            alert("Delete Failed , Try again");
-        }
-    }
+        $.ajax({
+            url:"http://localhost:8080/POS/customer?customerID="+ $("#inputSearchCus").val(),
+            method:"DELETE",
 
-    loadAllCustomers();
+            success(resp) {
+                if (resp.status == 200) {
+                    alert(resp.message);
+                    loadAllCustomers();
+                    clearAll();
+                } else if (resp.status == 400) {
+                    alert(resp.message);
+                } else {
+                    alert(resp.data);
+                }
+            }
+        });
+    }
+    
     $('#inputSearchCus').val("");
 });
 
 $("#btnCusUpdate").click(function () {
     updateCustomer();
     loadAllCustomers();
-    $('#inputCusID,#inputCusName,#inputCusAddress,#inputCusSalary').val("");
+
 });
 
 $("#btnCusSearch").click(function () {
