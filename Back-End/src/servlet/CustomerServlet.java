@@ -17,12 +17,12 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 
 
-@WebServlet (urlPatterns = "/customer")
+@WebServlet(urlPatterns = "/customer")
 public class CustomerServlet extends HttpServlet {
 
     private final CustomerBO customerBO = (CustomerBO) BOFactory.getBOFactory().getBO(BOFactory.BoTypes.Customer);
 
-    @Resource (name = "java:comp/env/jdbc/pool")
+    @Resource(name = "java:comp/env/jdbc/pool")
     DataSource dataSource;
 
     @Override
@@ -54,14 +54,14 @@ public class CustomerServlet extends HttpServlet {
         resp.setContentType("application/jason");
 
         CustomerDTO customerDTO = new CustomerDTO(
-                custId,custName,address,salary
+                custId, custName, address, salary
         );
 
         PrintWriter writer = resp.getWriter();
 
 
         try {
-            if (customerBO.addNewCustomer(customerDTO,dataSource)){
+            if (customerBO.addNewCustomer(customerDTO, dataSource)) {
                 JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
                 resp.setStatus(HttpServletResponse.SC_OK);
                 objectBuilder.add("status", 200);
@@ -83,38 +83,36 @@ public class CustomerServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        JsonReader reader = Json.createReader(req.getReader());
-        JsonObject jsonObject = reader.readObject();
-
-        String custId = jsonObject.getString("cusUpdateId");
-        String custName = jsonObject.getString("cusUpdateName");
-        String address = jsonObject.getString("cusUpdateAddress");
-        String salary = jsonObject.getString("cusUpdateSalary");
-
-        resp.setContentType("application/jason");
-        PrintWriter writer = resp.getWriter();
-
-
+        
+        String custId = req.getParameter("cusUpdateId");
+        String custName = req.getParameter("cusUpdateName");
+        String address = req.getParameter("cusUpdateAddress");
+        String salary = req.getParameter("cusUpdateSalary");
 
         CustomerDTO customerDTO = new CustomerDTO(
-                custId,custName,address,salary
+                custId, custName, address, salary
         );
+        PrintWriter writer = resp.getWriter();
         try {
-            if(customerBO.updateCustomer(customerDTO,dataSource)){
+            if (customerBO.updateCustomer(customerDTO, dataSource)) {
                 JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-                objectBuilder.add("data","");
-                objectBuilder.add("message","Update Done");
-                objectBuilder.add("status",200);
-                writer.print(objectBuilder.build());
+                objectBuilder.add("data", "");
+                objectBuilder.add("message", "Update Done");
+                objectBuilder.add("status", 200);
+                writer.write("Customer Updated");
+
             }
         } catch (SQLException | ClassNotFoundException e) {
             JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-            objectBuilder.add("data",e.getLocalizedMessage());
-            objectBuilder.add("message","Error");
-            objectBuilder.add("status",500);
+            objectBuilder.add("data", e.getLocalizedMessage());
+            objectBuilder.add("message", "Error");
+            objectBuilder.add("status", 500);
             writer.print(objectBuilder.build());
         }
-    }
+
+
+}
+
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String customerID = req.getParameter("customerID");
@@ -122,28 +120,28 @@ public class CustomerServlet extends HttpServlet {
         resp.setContentType("application/json");
 
         try {
-            if(customerBO.deleteCustomer(customerID,dataSource)){
+            if (customerBO.deleteCustomer(customerID, dataSource)) {
 
                 JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-                objectBuilder.add("data","");
-                objectBuilder.add("message","Successfully Deleted");
-                objectBuilder.add("status",200);
+                objectBuilder.add("data", "");
+                objectBuilder.add("message", "Successfully Deleted");
+                objectBuilder.add("status", 200);
                 writer.print(objectBuilder.build());
-            }else{
+            } else {
 
                 JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-                objectBuilder.add("data","");
-                objectBuilder.add("message","Unsuccessfully Deleted");
-                objectBuilder.add("status",400);
+                objectBuilder.add("data", "");
+                objectBuilder.add("message", "Unsuccessfully Deleted");
+                objectBuilder.add("status", 400);
                 writer.print(objectBuilder.build());
             }
         } catch (SQLException | ClassNotFoundException e) {
 
             resp.setStatus(200);
             JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-            objectBuilder.add("data",e.getLocalizedMessage());
-            objectBuilder.add("messages","Error");
-            objectBuilder.add("status",500);
+            objectBuilder.add("data", e.getLocalizedMessage());
+            objectBuilder.add("messages", "Error");
+            objectBuilder.add("status", 500);
             writer.print(objectBuilder.build());
 
         }
