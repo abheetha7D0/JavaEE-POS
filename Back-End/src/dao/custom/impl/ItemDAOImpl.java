@@ -48,7 +48,7 @@ public class ItemDAOImpl implements ItemDAO {
     @Override
     public boolean update(Item item, DataSource dataSource) throws SQLException, ClassNotFoundException {
         Connection connection = dataSource.getConnection();
-        PreparedStatement stm = connection.prepareStatement("UPDATE item SET Description=?, qtyOnHand=?, unitPrice=? WHERE ItemCode=?");
+        PreparedStatement stm = connection.prepareStatement("UPDATE item SET NAME =?, qtyOnHand=?, unitPrice=? WHERE ItemCode=?");
         stm.setObject(1,item.getItemName());
         stm.setObject(2,Integer.parseInt(item.getQty()));
         stm.setObject(3,Double.parseDouble(item.getUnitPrice()));

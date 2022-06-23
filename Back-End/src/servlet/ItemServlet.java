@@ -52,7 +52,7 @@ public class ItemServlet extends HttpServlet {
         String qty = req.getParameter("qty");
         String unitPrice = req.getParameter("unitPrice");
 
-        resp.setContentType("application/jason");
+        resp.setContentType("application/json");
 
         ItemDTO dto=new ItemDTO(
                 itemCode,itemName,qty,unitPrice
@@ -81,5 +81,70 @@ public class ItemServlet extends HttpServlet {
             writer.print(objectBuilder.build());
         }
 
+    }
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        String itemCode = req.getParameter("itemUCode");
+        String itemName = req.getParameter("itemUName");
+        String qty = req.getParameter("uQty");
+        String unitPrice = req.getParameter("uUnitPrice");
+
+        ItemDTO itemDTO = new ItemDTO(
+                itemCode, itemName, qty, unitPrice
+        );
+        PrintWriter writer = resp.getWriter();
+        resp.setContentType("application/json");
+        try {
+            if (itemBO.updateItem(itemDTO, dataSource)) {
+                JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+                objectBuilder.add("data", "");
+                objectBuilder.add("message", "Update Done");
+                objectBuilder.add("status", 200);
+                writer.print(objectBuilder.build());
+
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+            objectBuilder.add("data", e.getLocalizedMessage());
+            objectBuilder.add("message", "Error");
+            objectBuilder.add("status", 500);
+            writer.print(objectBuilder.build());
+        }
+
+
+    }
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String itemCode = req.getParameter("itemCode");
+        PrintWriter writer = resp.getWriter();
+        resp.setContentType("application/json");
+
+        try {
+            if (itemBO.deleteItem(itemCode, dataSource)) {
+
+                JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+                objectBuilder.add("data", "");
+                objectBuilder.add("message", "Successfully Deleted");
+                objectBuilder.add("status", 200);
+                writer.print(objectBuilder.build());
+            } else {
+
+                JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+                objectBuilder.add("data", "");
+                objectBuilder.add("message", "Unsuccessfully Deleted");
+                objectBuilder.add("status", 400);
+                writer.print(objectBuilder.build());
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+
+            resp.setStatus(200);
+            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+            objectBuilder.add("data", e.getLocalizedMessage());
+            objectBuilder.add("messages", "Error");
+            objectBuilder.add("status", 500);
+            writer.print(objectBuilder.build());
+
+        }
     }
 }

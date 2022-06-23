@@ -1,6 +1,6 @@
 function loadAllCustomers() {
 
-    $("#customerTable ").empty();
+ $("#customerTable ").empty();
 
     $.ajax({
         url: "http://localhost:8080/POS/customer",
@@ -14,6 +14,7 @@ function loadAllCustomers() {
             bindClickEvents();
         }
     });
+
 }
 
 
@@ -25,18 +26,20 @@ function saveCustomer() {
         url: "http://localhost:8080/POS/customer",
         method: "post",
         data: data,
-        success(res) {
-            alert(res);
-            $("#txtCusID").val("");
-            $("#txtCusName").val("");
-            $("#txtCusAddress").val("");
-            $("#txtCusSalary").val("");
-            loadAllCustomers();
+        success: function (res) {
+            if (res.status == 200) {
+                alert(res.message);
+                loadAllCustomers();
+            } else {
+                alert(res.data);
+
+                loadAllCustomers();
+            }
+
         },
-        error: function (ob, txtStatus, error) {
-            alert(txtStatus);
-        }
     })
+    clearAll();
+
 }
 
 function deleteCustomer(id) {
@@ -66,15 +69,9 @@ $("#btnCusDelete").click(function () {
     let id = $('#inputSearchCus').val();
     let option = confirm(`Do you want to delete ID:${id}`);
     if (option) {
-        let erase = deleteCustomer(id);
-        if (erase) {
-            alert("Customer Deleted");
-        } else {
-            alert("Delete Failed , Try again");
-        }
+        deleteCustomer(id);
     }
-
-    loadAllCustomers();
+    $("#customerTable ").empty();
 });
 
 $("#btnCusUpdate").click(function () {
@@ -89,8 +86,9 @@ function updateCustomer() {
     $.ajax({
         url: "http://localhost:8080/POS/customer?" + formData,
         method: "PUT",
-        success: function (res) {
-            alert(res);
+        success: function (resp) {
+
+            alert(resp.message);
             loadAllCustomers();
         }
     });
@@ -141,7 +139,7 @@ function searchCustomerFromID(typedCustomerID) {
 $("#btnCusSave").click(function () {
 
     saveCustomer();
-    loadAllCustomers();
+    clearAll();
 
 });
 
@@ -156,7 +154,7 @@ $("#btnGetAllCus").click(function () {
 });
 
 
-const cusIDRegEx = /^(C0-)[0-9]{1,3}$/;
+const cusIDRegEx = /^(C)[0-9]{1,3}$/;
 const cusNameRegEx = /^[A-z ]{5,20}$/;
 const cusAddressRegEx = /^[0-9/A-z. ,]{7,}$/;
 const cusSalaryRegEx = /^[0-9]{1,}[.]?[0-9]{1,2}$/;
@@ -164,7 +162,7 @@ const cusSalaryRegEx = /^[0-9]{1,}[.]?[0-9]{1,2}$/;
 
 $('#txtCusID,#txtCusName,#txtCusAddress,#txtCusSalary').on('keydown', function (eventOb) {
     if (eventOb.key == "Tab") {
-        eventOb.preventDefault(); // stop execution of the button
+        eventOb.preventDefault();
     }
 });
 
@@ -211,15 +209,17 @@ $("#txtCusSalary").on('keyup', function (eventOb) {
 });
 
 
-$("#btnCustomer").attr('disabled', true);
+$("#btnCusSave").attr('disabled', true);
 
 function clearAll() {
     $('#txtCusID,#txtCusName,#txtCusAddress,#txtCusSalary,#inputUId,#inputUAddress,#inputUCustomerName,#inputUSalary').val("");
     $('#txtCusID,#txtCusName,#txtCusAddress,#txtCusSalary').css('border', '2px solid #ced4da');
     $('#txtCusID').focus();
     $("#btnCustomer").attr('disabled', true);
-    loadAllCustomers();
+
     $("#lblcusid,#lblcusname,#lblcusaddress,#lblcussalary").text("");
+    $("#btnCusSave").attr('disabled', true);
+
 }
 
 function formValid() {
@@ -298,9 +298,9 @@ function checkIfValid() {
 function setButton() {
     let b = formValid();
     if (b) {
-        $("#btnCustomer").attr('disabled', false);
+        $("#btnCusSave").attr('disabled', false);
     } else {
-        $("#btnCustomer").attr('disabled', true);
+        $("#btnCusSave").attr('disabled', true);
     }
 }
 

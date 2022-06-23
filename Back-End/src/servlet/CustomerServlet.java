@@ -27,12 +27,13 @@ public class CustomerServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        PrintWriter writer = resp.getWriter();
         resp.setContentType("application/json");
 
         try {
 
             JsonArrayBuilder jsonArrayBuilder = customerBO.loadAllCustomerForTable(dataSource);
-            PrintWriter writer = resp.getWriter();
+
             JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
             objectBuilder.add("status", 200);
             objectBuilder.add("message", "done");
@@ -51,39 +52,40 @@ public class CustomerServlet extends HttpServlet {
         String address = req.getParameter("Address");
         String salary = req.getParameter("Salary");
 
-        resp.setContentType("application/jason");
+
 
         CustomerDTO customerDTO = new CustomerDTO(
                 custId, custName, address, salary
         );
 
         PrintWriter writer = resp.getWriter();
-
+        resp.setContentType("application/json");
 
         try {
             if (customerBO.addNewCustomer(customerDTO, dataSource)) {
                 JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-                resp.setStatus(HttpServletResponse.SC_OK);
+                resp.setStatus(HttpServletResponse.SC_CREATED);
                 objectBuilder.add("status", 200);
-                objectBuilder.add("message", "done");
-                objectBuilder.add("data", "Sucessfully Added !");
+                objectBuilder.add("message", "Successfully Added");
+                objectBuilder.add("data", "");
                 writer.print(objectBuilder.build());
             }
         } catch (SQLException | ClassNotFoundException throwables) {
             JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-            resp.setStatus(HttpServletResponse.SC_CREATED);
 
             objectBuilder.add("status", 400);
-            objectBuilder.add("message", "Fail");
+            objectBuilder.add("message", "Error");
             objectBuilder.add("data", throwables.getLocalizedMessage());
             writer.print(objectBuilder.build());
+            resp.setStatus(HttpServletResponse.SC_OK);
+            throwables.printStackTrace();
         }
 
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        
+
         String custId = req.getParameter("cusUpdateId");
         String custName = req.getParameter("cusUpdateName");
         String address = req.getParameter("cusUpdateAddress");
@@ -93,13 +95,14 @@ public class CustomerServlet extends HttpServlet {
                 custId, custName, address, salary
         );
         PrintWriter writer = resp.getWriter();
+        resp.setContentType("application/json");
         try {
             if (customerBO.updateCustomer(customerDTO, dataSource)) {
                 JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
                 objectBuilder.add("data", "");
                 objectBuilder.add("message", "Update Done");
                 objectBuilder.add("status", 200);
-                writer.write("Customer Updated");
+                writer.print(objectBuilder.build());
 
             }
         } catch (SQLException | ClassNotFoundException e) {

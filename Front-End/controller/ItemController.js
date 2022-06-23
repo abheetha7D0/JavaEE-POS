@@ -1,13 +1,15 @@
+loadAllItems()
+
 function loadAllItems() {
 
     $("#itemTable").empty();
     $.ajax({
-        url:"http://localhost:8080/POS/item",
-        method:"GET",
+        url: "http://localhost:8080/POS/item",
+        method: "GET",
         success(resp) {
             console.log(resp.data);
             for (var i of resp.data) {
-                var row = `<tr><td>${i.ItemCode}</td><td>${i.name}</td><td>${i.QtyOnHand}</td><td>${i.unitPrice}</td></tr>`;
+                var row = `<tr><td>${i.code}</td><td>${i.name}</td><td>${i.qty}</td><td>${i.unitPrice}</td></tr>`;
 
                 $("#itemTable").append(row);
 
@@ -15,10 +17,11 @@ function loadAllItems() {
                 $("#itemTable>tr").click(function () {
 
 
-                    $("#txtItemCode").val($(this).children(":eq(0)").text());
-                    $("#txtItemName").val($(this).children(":eq(1)").text());
-                    $("#txtQty").val($(this).children(":eq(2)").text());
-                    $("#txtPrice").val($(this).children(":eq(3)").text());
+                    $("#btnSearchItem").val($(this).children(":eq(0)").text());
+                    $("#inputUCode").val($(this).children(":eq(0)").text());
+                    $("#inputUName").val($(this).children(":eq(1)").text());
+                    $("#inputUPrice").val($(this).children(":eq(2)").text());
+                    $("#inputUQuantity").val($(this).children(":eq(3)").text());
 
 
                 });
@@ -45,43 +48,65 @@ function saveItem() {
                 alert(res.data);
             }
         },
-        error (ob, textStatus, error) {
-            alert(textStatus);
 
-
-        }
     });
 }
 
 function deleteItem(code) {
-    let item;
     if (code != null) {
-        for (var i = 0; i < itemDB.length; i++) {
-            if (item == itemDB[i].getItemCode()) {
-                item = itemDB[i];
+        $.ajax({
+            url: "http://localhost:8080/POS/item?itemCode=" + code,
+            method: "DELETE",
+            success(resp) {
+                if (resp.status == 200) {
+                    alert(resp.message);
+                    loadAllItems()
+                    clearAll();
+                } else if (resp.status == 400) {
+                    alert(resp.message);
+                    return false;
+
+                } else {
+                    alert(resp.data);
+                    return false;
+                }
             }
-        }
-        let indexNumber = itemDB.indexOf(item);
-        itemDB.splice(indexNumber, 1);
+        });
         return true;
     } else {
         return false;
     }
 }
 
-function updateItem() {
-    let code = $('#inputUCode').val();
-    let Name = $("#inputUName").val();
-    let price = $("#inputUPrice").val();
-    let quantity = $("#inputUQuantity").val();
-    for (var i = 0; i < itemDB.length; i++) {
-        if (itemDB[i].getItemCode() == $("#inputCode").val()) {
-            var item = itemDB[i];
-            item.setItemName(Name);
-            item.setItemQTY(price);
-            item.setUnitPrice(quantity)
-        }
+$("#btnItemDelete").click(function () {
+    let code = $('#btnSearchItem').val();
+    let option = confirm(`Do you want to delete ID:${code}`);
+    if (option) {
+        deleteItem(code);
+
+        $('#btnSearchItem').val("");
+
     }
+
+    $("#itemTable").empty();
+});
+
+function updateItem() {
+    let formData = $("#itemUpdateForm").serialize();
+    $.ajax({
+        url: "http://localhost:8080/POS/item?" + formData,
+        method: "PUT",
+        success: function (resp) {
+            if (resp.status == 200) {
+                alert(resp.message);
+                loadAllItems();
+            } else {
+                alert(resp.data);
+            }
+        }
+
+
+    });
 }
 
 function searchItem() {
@@ -104,21 +129,6 @@ $("#btnItemSave").click(function () {
     $("#inputCode,#inputItemName,#inputPrice,#inputQuantity").val("");
 });
 
-$("#btnItemDelete").click(function () {
-    let code = $('#btnSearchItem').val();
-    let option = confirm(`Do you want to delete ID:${code}`);
-    if (option) {
-        let erase = deleteItem(code);
-        if (erase) {
-            alert("Customer Deleted");
-            $('#inputCode,#inputName,#inputPrice,#inputQuantity').val("");
-        } else {
-            alert("Delete Failed , Try again");
-        }
-    }
-    loadAllItems();
-    $('#btnItemSearch').val("");
-});
 
 $("#btnItemUpdate").click(function () {
     updateItem();
@@ -126,13 +136,13 @@ $("#btnItemUpdate").click(function () {
     $('#inputCode,#inputName,#inputPrice,#inputQuantity').val("");
 });
 
-$("#btnItemSearch").click(function () {
+$("#btnSearchItem").click(function () {
     searchItem();
 });
 
 $("#btnGetAllItem").click(function () {
     loadAllItems();
-    $('#btnItemSearch').val("");
+    $('#btnSearchItem').val("");
 });
 
 
@@ -158,7 +168,7 @@ $("#inputCode").on('keyup', function (eventOb) {
     if (eventOb.key == "Enter") {
         checkIfValidItem();
     }
-    });
+});
 
 $("#inputItemName").on('keyup', function (eventOb) {
     setButtonItem();
@@ -228,7 +238,7 @@ function formValidItem() {
         }
     } else {
         $("#inputCode").css('border', '2px solid red');
-        $("#ItemCodeError").text("Item Code is a required field : Pattern I00-000");
+        $("#ItemCodeError").text("Item Code is a required field : Pattern I000");
 
         return false;
     }
